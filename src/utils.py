@@ -1,67 +1,73 @@
 from abc import ABC, abstractmethod
 import requests
 
+
 class JobPlatformAPI(ABC):
-    """Абстрактный класс для работы с API"""
+    pass
+
     @abstractmethod
     def connect(self):
         """Метод для подключения к API"""
         pass
 
     @abstractmethod
-    def get_vacancy(self, keyword: str) -> list:
-        """Метод для получения вакансий по ключевому слову"""
+    def get_vacancies(self, keyword: str):
+        """Меотод для получения вакансий по ключевому слову"""
         pass
 
-class HHruAPI(JobPlatformAPI):
-    """Класс для работы с API hh.ru"""
+
+class HHAPI(JobPlatformAPI):
+    """Класс для работы с API HH.ru"""
+
     def __init__(self):
         self.base_url = "https://api.hh.ru/vacancies"
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-            '(KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
         }
 
     def connect(self):
-        """Метод для подключения к API hh.ru"""
-        return "Подключение к API прошло успешно"
+        """Подключение к API HH.ru"""
+        print("Подключение к API установлено")
 
-    def get_vacancy(self, keyword: str) -> list:
-        """Получает список вакансий по ключевому слову."""
+
+    def get_vacancies(self, keyword: str, per_page=100, page=0):
         params = {
-            "text": keyword,
-            "per_page": 100
+            "text": keyword,       # Ключевое слово для поиска
+            "per_page": per_page,  # Количество вакансий на странице
+            "page": page           # Номер страницы
         }
-        response = requests.get(self.base_url, headers=self.headers, params=params)
+        response = requests.get(self.base_url, params=params)
+
         if response.status_code == 200:
-            return response.json().get('items', [])
+            data = response.json()
+            return data.get('items', [])  # Возвращаем список вакансий
         else:
             print(f"Ошибка при запросе к API HeadHunter: {response.status_code}")
             return []
 
 class SuperJobAPI(JobPlatformAPI):
-    """Класс для работы с API SuperJob"""
+
     def __init__(self, api_key: str):
-        if not api_key:
-            raise ValueError("API ключ не может быть пустым")
         self.base_url = "https://api.superjob.ru/2.0/vacancies/"
         self.headers = {
-            "X-Api_App-Id": api_key
+            "X-Api-App-Id": api_key
         }
 
     def connect(self):
-        """Метод для подключения к API SuperJob"""
-        return "Подключение к API прошло успешно"
+        """Подключение к API SuperJob"""
+        print("Подключение к API установлено")
 
-    def get_vacancy(self, keyword: str) -> list:
-        """Получает список вакансий по ключевому слову."""
+    def get_vacancies(self, keyword: str, count=100, page=0):
         params = {
-            "text": keyword,
-            "per_page": 100
+            "keyword": keyword,  # Ключевое слово для поиска
+            "count": count,      # Количество вакансий на странице
+            "page": page         # Номер страницы
         }
         response = requests.get(self.base_url, headers=self.headers, params=params)
+
         if response.status_code == 200:
-            return response.json().get('objects', [])
+            data = response.json()
+            return data.get('objects', [])  # Возвращаем список вакансий
         else:
             print(f"Ошибка при запросе к API SuperJob: {response.status_code}")
             return []
